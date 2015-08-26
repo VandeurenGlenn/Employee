@@ -1,0 +1,185 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/paper-header-panel/paper-header-panel.html">
+<link rel="import" href="..\..\bower_components/paper-input/paper-input.html">
+<link rel="import" href="..\..\bower_components/paper-item/paper-item.html">
+<link rel="import" href="..\..\bower_components/paper-checkbox/paper-checkbox.html">
+<link rel="import" href="..\..\bower_components/paper-fab/paper-fab.html">
+
+<dom-module id="create-account-section">
+  <template>
+    <style>
+      :host {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        box-sizing: border-box;
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        background: #B2DFDB;
+      }
+      paper-header-panel {
+        width: 100%;
+      }
+      .title {
+        text-transform: capitalize;
+      }
+      iron-pages {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        background: #B2DFDB;
+      }
+      section {
+        height: 100%;
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+      }
+      paper-material {
+        background: #eee;
+        width: 300px;
+        padding: 32px;
+      }
+      paper-input {
+        text-transform: capitalize;
+      }
+      paper-button {
+        background: #009688;
+        color: #FFFFFF;
+      }
+      .paper-font-display2 {
+        margin: 16px 0;
+      }
+      h2 {
+        margin-top: 0;
+      }
+    </style>
+    <paper-header-panel>
+      <paper-toolbar class="tall">
+        <span class="middle title paper-font-display1">Account Wizard</span>
+        <span class="bottom title paper-font-subhead">[[wizardRoute]]</span>
+      </paper-toolbar>
+      <iron-pages attr-for-selected="account-wizard-route" selected="[[wizardRoute]]">
+        <section account-wizard-route="sign up method">
+          <div elevation="1" id="signUp">
+            <h2 class="paper-font-title">Select sign up method</h2>
+            <paper-input label="email" type="email" auto-validate auto-complete></paper-input>
+            <paper-item><paper-checkbox></paper-checkbox>Login with Google</paper-item>
+            <a href="/create-account/create-new-account"><paper-button title="Create A New Account" raised on-tap="createNewAccount">create an account</paper-button></a>
+          </div>
+        </section>
+        <section account-wizard-route="create new account">
+          <div elevation="1" id="userInfo">
+            <!-- <paper-toolbar class="tall" style="width: 100%;">
+
+            </paper-toolbar> -->
+            <paper-input label="Username" auto-validate auto-complete></paper-input>
+            <paper-input label="firstname" auto-complete></paper-input>
+            <paper-input label="lastname" auto-complete></paper-input>
+            <paper-input label="Password" type="password"></paper-input>
+            <paper-input label="Confirm Password" type="password"></paper-input>
+            <paper-fab icon="check" title="proceed to next step" disabled$="[[_computeDisabled(validated)]]"></paper-fab>
+          </div>
+        </section>
+        <section></section>
+      </iron-pages>
+    </paper-header-panel>
+    <paper-toast id="paperToast" text="Your draft has been discarded."></paper-toast>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'create-account-section',
+
+      properties: {
+        wizardRoute: {
+          type: String,
+          value: 'sign up method',
+          observer: 'wizardRouteChanged'
+        },
+
+        validated: {
+          type: Array,
+          value: new Array()
+        }
+      },
+
+      wizardRouteChanged: function (route, oldRoute) {
+        if (route === 'create-new-account') {
+
+        } else if (oldRoute === 'create-new-account') {
+
+        }
+      },
+
+      createNewAccount: function () {
+        this.wizardRoute = 'create new account';
+        // this.newUser = new Object('');
+      },
+
+      initEventListeners: function (id) {
+        var inputs = this._getInputs(id);
+        for (var i = 0; i < inputs.length; i++) {
+          inputs[i].addEventListener('change', this._fireChange.bind(this));
+        }
+      },
+
+      _getInputs: function (id) {
+        if (id) {
+          return this.querySelector('#' + id).querySelectorAll('paper-input');
+        }
+        // return all
+        return this.querySelectorAll('paper-input');
+      },
+
+      _fireChange: function (change) {
+        var target = Polymer.dom(change).localTarget;
+        if (target.label === 'email' && target.value.includes('@gmail.com')) {
+          // show a tooltip that google login is selected
+          Polymer.dom(this.querySelector('paper-checkbox')).setAttribute('checked', true);
+          console.log('login using google');
+        } else if (target.label === 'email' && target.value.includes('@')) {          
+           this.newUser = new Object({login: {provider: "custom"}});
+           // this.newUser.login = {provider: "custom"};
+           console.log(this.newUser);
+        }
+        if (event.target.validity.typeMismatch) {
+          this._showToast(target.label + ': ' + event.target.validationMessage);
+        } else {
+          this.push('validated', target);
+          this._showToast(target.label + ': saved!');
+        }
+      },
+
+      _showToast: function (text) {
+        this.$.paperToast.text = text;
+        this.$.paperToast.show();
+      },
+
+      _computeDisabled: function (data) {
+        console.log(data);
+        for (var i = 0; i < data.length; i++) {
+          console.log(data[i])
+        }
+        return true;
+
+      }
+    });
+  })();
+  </script>
+</dom-module>
