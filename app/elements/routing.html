@@ -19,18 +19,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       app.route = 'welcome';
     });
 
-    page('/create-account', function () {
-      app.route = 'create-account';
-    });
-
-    page('/create-account/sign-up', function () {
+    page('/sign-up', function () {
       app.route = 'create-account';
       createAccount = document.querySelector('create-account-section');
       createAccount.wizardRoute = 'sign up method';
       createAccount.initEventListeners('signUp');
     });
 
-    page('/create-account/create-new-account', function () {
+    page('/create-new-account', function () {
       app.route = 'create-account';
       createAccount = document.querySelector('create-account-section');
       createAccount.wizardRoute = 'create new account';
