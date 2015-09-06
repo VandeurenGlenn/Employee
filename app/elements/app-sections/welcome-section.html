@@ -29,12 +29,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 24px auto 0px auto;
       }
     </style>
+    <firebase-auth location="https://employeeio.firebaseio.com" user="{{_fbUser}}" hidden></firebase-auth>
     <paper-material elevation="1">
       <h2 class="paper-font-display2">Welcome</h2>
       <span class="paper-font-subhead">Please login or create an account first.</span>
 
       <span class="button-bar">
-        <paper-button raised>Login</paper-button>
+        <paper-button raised on-tap="login">Login</paper-button>
         <a href="/sign-up">
           <paper-button raised>Create</paper-button>
         </a>
@@ -54,6 +55,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: 'welcome-section',
           notify: true
         }
+      },
+
+      login: function () {
+        var fbLogin = this.querySelector('firebase-auth');
+        fbLogin.provider = 'google';
+        fbLogin.params = {scope: 'email'};
+        fbLogin.login();
       }
     });
   })();
