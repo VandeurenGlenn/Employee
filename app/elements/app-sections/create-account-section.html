@@ -114,7 +114,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
     <!-- TODO: Add route bar -->
-    <firebase-auth location="https://employeeio.firebaseio.com" user="{{_fbUser}}" on-error="errorHandler" status-known="{{statusKnown}}" hidden></firebase-auth>
+    <firebase-auth location="https://employeeio.firebaseio.com" user="{{_fbUser}}" on-error="errorHandler" status-known="{{statusKnown}}" hidden redirect></firebase-auth>
     <paper-header-panel>
       <paper-toolbar class="tall">
         <span class="middle title paper-font-display1">Account Wizard</span>
@@ -326,27 +326,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       *
       */
       syncUser: function (user) {
-        this._user = {
-          name: user.google.cachedUserProfile.name,
-          first_name: user.google.cachedUserProfile.given_name,
-          family_name: user.google.cachedUserProfile.family_name,
-          gender: user.google.cachedUserProfile.gender,
-          google_id: user.google.cachedUserProfile.id,
-          google_plus_link: user.google.cachedUserProfile.link,
-          google_profile_picture: user.google.cachedUserProfile.picture,
-          email: user.google.email
-        }
-        this.debounce('checkDuplicate', function () {
-          this._checkForDuplicateEmail(this._user.email);
-          if (!this._duplicate) {
-            this.wizardRoute = 'create new account';
-          } else {
-            this.wizardRoute = 'sign up method';
+        if (user) {
+          this._user = {
+            name: user.google.cachedUserProfile.name,
+            first_name: user.google.cachedUserProfile.given_name,
+            family_name: user.google.cachedUserProfile.family_name,
+            gender: user.google.cachedUserProfile.gender,
+            google_id: user.google.cachedUserProfile.id,
+            google_plus_link: user.google.cachedUserProfile.link,
+            google_profile_picture: user.google.cachedUserProfile.picture,
+            email: user.google.email
           }
-        }, 1000);
-
-
-
+          this.debounce('checkDuplicate', function () {
+            this._checkForDuplicateEmail(this._user.email);
+            if (!this._duplicate) {
+              this.wizardRoute = 'create new account';
+            } else {
+              this.wizardRoute = 'sign up method';
+            }
+          }, 1000);
+        }
       },
 
       login: function () {
@@ -355,7 +354,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _computeSaveDisabled: function(name, location) {
-        console.log(location);
         if (location && name) {
           return false;
         }
@@ -380,7 +378,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var fab = this.$.signUp.querySelector('paper-fab');
           for (var i in snap.val()) {
             if (snap.val().hasOwnProperty(i)) {
-              console.log(snap.val()[i]);
               if (snap.val()[i].email === email) {
                 var p = document.createElement('p');
                 p.innerHTML = 'Email already registered';
