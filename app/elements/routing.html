@@ -10,49 +10,118 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script src="../../bower_components/page/page.js"></script>
 <script>
-  window.addEventListener('WebComponentsReady', function() {
-
+  // var logged_in = localStorage.getItem('firebase:session::employeeio') ? true:false;
+  // page('/', function (data) {//
+  //     app.route = 'splash';
+  //   }
+  // });
+  window.addEventListener('start-routing', function() {
+    var logged_in = localStorage.getItem('firebase:session::employeeio') ? true:false;
     // We use Page.js for routing. This is a Micro
     // client-side router inspired by the Express router
     // More info: https://visionmedia.github.io/page.js/
-    page('/', function () {
-      app.route = 'welcome';
+    page('/', function (data) {
+
+      if (logged_in) {
+        app.route = 'main';
+        app.dataRoute = 'employees';
+      } else {
+        app.route = 'welcome';
+      }
     });
 
     page('/sign-up', function () {
-      app.route = 'create-account';
-      createAccount = document.querySelector('create-account-section');
-      createAccount.wizardRoute = 'sign up method';
-      createAccount.initEventListeners('signUp');
+      if (logged_in) {
+        app.route = 'main';
+      } else {
+        app.route = 'create-account';
+        createAccount = document.querySelector('create-account-section');
+        createAccount.wizardRoute = 'sign up method';
+        createAccount.initEventListeners('signUp');
+      }
     });
 
     page('/create-new-account', function () {
-      app.route = 'create-account';
-      createAccount = document.querySelector('create-account-section');
-      createAccount.wizardRoute = 'create new account';
-      createAccount.initEventListeners('userInfo');
+      if (logged_in) {
+        app.route = 'main';
+      } else {
+        app.route = 'create-account';
+        createAccount = document.querySelector('create-account-section');
+        createAccount.wizardRoute = 'create new account';
+        createAccount.initEventListeners('userInfo');
+      }
+    });
+
+    page('/setup-company', function () {
+      if (logged_in) {
+        app.route = 'main';
+      } else {
+        app.route = 'create-account';
+        createAccount = document.querySelector('create-account-section');
+        createAccount.wizardRoute = 'add company info';
+        createAccount.initEventListeners('companyInfo');
+      }
+    });
+
+    page('/account-wizard-complete', function () {
+      if (logged_in) {
+        app.route = 'main';
+      } else {
+        app.route = 'create-account';
+        createAccount = document.querySelector('create-account-section');
+        createAccount.wizardRoute = 'finished';
+        createAccount.removeEventListeners();
+      }
+
+    });
+
+    page('/main', function () {
+      if (logged_in) {
+        app.route = 'main';
+        app.dataRoute = 'employees';
+      } else {
+        app.route = 'welcome';
+      }
     });
 
     page('/account', function () {
-      app.route = 'account';
+      if (logged_in) {
+        app.route = 'main';
+        app.dataRoute = 'account';
+      } else {
+        app.route = 'welcome';
+      }
+
     });
 
     page('/employees', function () {
-      app.route = 'employees';
+      if (logged_in) {
+        app.route = 'main';
+        app.dataRoute = 'employees';
+      } else {
+        app.route = 'welcome';
+      }
     });
 
     page('/employees/:name', function (data) {
-      app.route = 'employee-info';
-      app.params = data.params;
+      if (logged_in) {
+        app.route = 'main';
+        app.dataRoute = 'employee-info';
+        app.employeeId = data.params.name;
+      } else {
+        app.route = 'welcome';
+      }
     });
 
     page('/contact', function () {
-      app.route = 'contact';
+      app.route = 'main';
+      app.dataRoute = 'contact';
     });
 
     page('/license', function () {
-      app.route = 'license';
-    })
+      app.route = 'main';
+      app.dataRoute = 'license';
+    });
 
     // add #! before urls
     page({
