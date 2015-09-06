@@ -219,12 +219,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: function () {
             return {
               name: null,
-              first_name: null,
-              family_name: null,
+              firstName: null,
+              familyName: null,
               gender: null,
-              google_id: null,
-              google_plus_link: null,
-              google_profile_picture: null,
+              googleId: null,
+              googlePlusLink: null,
+              googleProfilePicture: null,
               company: {
                 name: null,
                 location: null,
@@ -329,12 +329,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         if (user) {
           this._user = {
             name: user.google.cachedUserProfile.name,
-            first_name: user.google.cachedUserProfile.given_name,
-            family_name: user.google.cachedUserProfile.family_name,
+            firstName: user.google.cachedUserProfile.given_name,
+            familyName: user.google.cachedUserProfile.family_name,
             gender: user.google.cachedUserProfile.gender,
-            google_id: user.google.cachedUserProfile.id,
-            google_plus_link: user.google.cachedUserProfile.link,
-            google_profile_picture: user.google.cachedUserProfile.picture,
+            googleId: user.google.cachedUserProfile.id,
+            googlePlusLink: user.google.cachedUserProfile.link,
+            googleProfilePicture: user.google.cachedUserProfile.picture,
             email: user.google.email
           }
           this.debounce('checkDuplicate', function () {

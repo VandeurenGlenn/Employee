@@ -10,19 +10,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script src="../../bower_components/page/page.js"></script>
 <script>
-  // var logged_in = localStorage.getItem('firebase:session::employeeio') ? true:false;
+  // var _loggedIn = localStorage.getItem('firebase:session::employeeio') ? true:false;
   // page('/', function (data) {//
   //     app.route = 'splash';
   //   }
   // });
   window.addEventListener('start-routing', function() {
-    var logged_in = localStorage.getItem('firebase:session::employeeio') ? true:false;
+    var _loggedIn = localStorage.getItem('firebase:session::employeeio') ? true:false;
     // We use Page.js for routing. This is a Micro
     // client-side router inspired by the Express router
     // More info: https://visionmedia.github.io/page.js/
     page('/', function (data) {
 
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
         app.dataRoute = 'employees';
       } else {
@@ -31,7 +31,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/sign-up', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
       } else {
         app.route = 'create-account';
@@ -42,7 +42,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/create-new-account', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
       } else {
         app.route = 'create-account';
@@ -53,7 +53,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/setup-company', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
       } else {
         app.route = 'create-account';
@@ -64,7 +64,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/account-wizard-complete', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
       } else {
         app.route = 'create-account';
@@ -76,7 +76,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/main', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
         app.dataRoute = 'employees';
       } else {
@@ -85,7 +85,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/account', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
         app.dataRoute = 'account';
       } else {
@@ -95,7 +95,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/employees', function () {
-      if (logged_in) {
+      if (_loggedIn) {
         app.route = 'main';
         app.dataRoute = 'employees';
       } else {
@@ -104,10 +104,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     });
 
     page('/employees/:name', function (data) {
-      if (logged_in) {
+      var name = data.params.name
+      if (_loggedIn) {
         app.route = 'main';
         app.dataRoute = 'employee-info';
-        app.employeeId = data.params.name;
+        app.employeeId = name;
       } else {
         app.route = 'welcome';
       }

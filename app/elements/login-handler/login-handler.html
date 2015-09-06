@@ -9,6 +9,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/firebase-element/firebase-auth.html">
+<script src="..\..\bower_components/firebase/firebase.js"></script>
 
 <script>
 (function() {
@@ -39,14 +41,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       //   console.log('cg');
       // });
 
-      this._firebaseAuth.addEventListener('status-known-changed', function (e) {
+      this._firebaseAuth.addEventListener('status-known-changed', function () {
         if (this._firebaseAuth.user) {
           var users = new Firebase('https://employeeio.firebaseio.com/users');
 
           users.on('value', function (users) {
 
             for (var user in users.val()) {
-              if (users.val().hasOwnProperty(user) && users.val()[user].google_id === this._firebaseAuth.user.google.cachedUserProfile.id) {
+              if (users.val().hasOwnProperty(user) && users.val()[user].googleId === this._firebaseAuth.user.google.cachedUserProfile.id) {
                 this.userId = user;
                 this.user = users.val()[user];
               }

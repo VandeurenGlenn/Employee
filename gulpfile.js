@@ -237,8 +237,8 @@ gulp.task('default', ['clean'], function (cb) {
   runSequence(
     ['copy', 'styles'],
     'elements',
-    ['jshint', 'images', 'fonts', 'html'],
-    'vulcanize', 'precache',
+    ['images', 'fonts', 'html'],
+    'vulcanize', 'precache', 'jshint',
     cb);
 });
 

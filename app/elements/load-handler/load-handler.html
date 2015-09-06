@@ -18,11 +18,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     is: 'load-handler',
 
     properties: {
-      loaded: {
-        type: Boolean,
-        value: false,
-        notify: true
-      },
 
       log: Boolean,
 
@@ -94,13 +89,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.push('listeners', ready);
           this.push('listeners', domChange);
           for (var i = 0; i < change.length; i++) {
-            this.push('listeners', change[i] + '-changed')
+            this.push('listeners', change[i] + '-changed');
           };
           break;
         case 'basic':
           this.push('listeners', ready);
           for (var i = 0; i < change.length; i++) {
-            this.push('listeners', change[i] + '-changed')
+            this.push('listeners', change[i] + '-changed');
           };
           break;
         case 'ready':
@@ -108,11 +103,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           break;
         case 'change':
           for (var i = 0; i < change.length; i++) {
-            this.push('listeners', change[i] + '-changed')
+            this.push('listeners', change[i] + '-changed');
           }
           break;
         case 'dom-change':
-          this.push('listeners', domChange)
+          this.push('listeners', domChange);
           break;
         default:
 
@@ -152,7 +147,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       for (var i = 0; i < this.neededProperties.length; i++) {
         if (this.neededProperties.hasOwnProperty(i)) {
 
-          this.neededProperties[i]
+          this.neededProperties[i];
           console.log(this.neededProperties[i]);
         }
       }

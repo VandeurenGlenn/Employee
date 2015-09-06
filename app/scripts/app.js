@@ -31,15 +31,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // have resolved and content has been stamped to the page
   app.addEventListener('dom-change', function() {
 
-    var employees = new Firebase('https://employeeio.firebaseio.com/users/-JyIZfklrF9IcfZ87TmS/employees')
+    var employees = new Firebase('https://employeeio.firebaseio.com/users/-JyIZfklrF9IcfZ87TmS/employees');
     employees.on('value', function(data) {
       var _employees = data.val();
       for (var _employee in _employees) {
         if (_employees.hasOwnProperty(_employee)) {
           app.employees = [];
-          _employees[_employee].user_id = _employee;
+          _employees[_employee].employeeId = _employee;
           app.push('employees', _employees[_employee]);
-          app.fire('employees-changed')
+          app.fire('employees-changed');
         }
       }
     });

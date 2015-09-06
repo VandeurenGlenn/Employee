@@ -133,10 +133,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 <section data-route="account">
                   <paper-material elevation="1">
                     <h1 class="paper-font-display2">user</h1>
-                    <img src="[[user.google_profile_picture]]" height="192" width="192"></img>
+                    <img src="[[user.googleProfilePicture]]" height="192" width="192"></img>
                     <h2 class="paper-font-title">name</h2>
                     <p>[[user.name]]</p>
-                    <a href="[[user.google_plus_link]]">Google plus Profile</a>
+                    <a href="[[user.googlePlusLink]]">Google plus Profile</a>
                     <h1 class="paper-font-display2">company</h1>
                     <h2 class="paper-font-title">name</h2>
                     <p>[[user.company.name]]</p>
@@ -151,7 +151,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                     <p>This is the employees section</p>
                     <iron-list id="employeesList" items="[[employees]]" as="employee" selection-enabled>
                       <template>
-                        <a href="[[_computeEmployeeLink(employee.user_id)]]">
+                        <a href="[[_computeEmployeeLink(employee.employeeId)]]">
                           <span>[[employee.name]]</span>
                         </a>
                         <!-- <a href="[[employee.name]]"><span>[[employee.name]]</span></a> -->
