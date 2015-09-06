@@ -1,0 +1,162 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+    is: 'load-handler',
+
+    properties: {
+      loaded: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      log: Boolean,
+
+      readyEvent: {
+        type: String,
+        value: 'WebComponentsReady'
+      },
+
+      /**
+      * Listen to prop-change events
+      *
+      */
+      change: {
+        type: Array,
+        value: []
+      },
+
+      domChange: {
+        type: String,
+        value: 'dom-change'
+      },
+
+      /**
+      *
+      *
+      * Options:
+      * - 'all': change + dom-change & ready
+      * - 'basic': change + ready
+      * - 'change'
+      * - 'dom-change'
+      * - 'ready'
+      */
+
+      listenTo: {
+        type: String,
+        value: 'basic'
+      },
+
+      listeners: {
+        type: Array,
+        value: function () {
+          return [];
+        }
+      },
+
+      neededProperties: {
+        type: Array,
+        value: function () {
+          return [];
+        },
+        observer: 'propertiesChanged'
+      },
+
+      loaded: {
+        type: Object,
+        notify: true,
+        value: {}
+      }
+    },
+
+    observers: [
+      '_computeListeners(readyEvent, change, domChange, listenTo, listeners)',
+      '_setListeners(listeners)'
+    ],
+
+    _computeListeners: function (ready, change, domChange, listenTo, listeners) {
+      switch (listenTo) {
+        case 'all':
+          this.push('listeners', ready);
+          this.push('listeners', domChange);
+          for (var i = 0; i < change.length; i++) {
+            this.push('listeners', change[i] + '-changed')
+          };
+          break;
+        case 'basic':
+          this.push('listeners', ready);
+          for (var i = 0; i < change.length; i++) {
+            this.push('listeners', change[i] + '-changed')
+          };
+          break;
+        case 'ready':
+          this.push('listeners', ready);
+          break;
+        case 'change':
+          for (var i = 0; i < change.length; i++) {
+            this.push('listeners', change[i] + '-changed')
+          }
+          break;
+        case 'dom-change':
+          this.push('listeners', domChange)
+          break;
+        default:
+
+      }
+    },
+
+    _setListeners: function () {
+      if (this.listeners) {
+        for (var i = 0; i < this.listeners.length; i++) {
+          this._setListener(this.listeners[i]);
+        }
+      }
+    },
+
+    _setListener: function (e) {
+      window.addEventListener(e, this._setLoaded.bind(this));
+    },
+
+    _setLoaded: function (event) {
+    // console.log(this.loaded, e);
+      if (event.type !== 'WebComponentsReady' && this.log) {
+        console.log('loaded: ', event.type, event.target.nodeName, event.target.domHost ? event.target.tagName:event.target.id);
+      } else if (event.type){
+        this.loaded[event.type.replace(/Ready|-changed/, '')] = true;
+        // this.push('loaded', event.type);
+      }
+      this.fire('loaded-changed', this.loaded);
+
+      console.log(this.loaded);
+      // else if (e.detail) {
+      //
+      // }
+
+    },
+
+    propertiesChanged: function () {
+      for (var i = 0; i < this.neededProperties.length; i++) {
+        if (this.neededProperties.hasOwnProperty(i)) {
+
+          this.neededProperties[i]
+          console.log(this.neededProperties[i]);
+        }
+      }
+    }
+  });
+})();
+</script>
