@@ -1,0 +1,64 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+
+<script>
+(function() {
+  'use strict';
+
+  Polymer({
+    is: 'login-handler',
+
+    properties: {
+      user: {
+        type: Object,
+        value: 'visitor',
+        notify: true
+      },
+
+      userId: {
+        type: String,
+        notify: true
+      }
+    },
+
+    attached: function () {
+      this._firebaseAuth = document.createElement('firebase-auth');
+      this._firebaseAuth.location = 'https://employeeio.firebaseio.com';
+      // this._firebaseAuth.login();
+      Polymer.dom(this).appendChild(this._firebaseAuth);
+      // this._firebaseAuth.addEventListener('user-changed', function () {
+      //   console.log('cg');
+      // });
+
+      this._firebaseAuth.addEventListener('status-known-changed', function (e) {
+        if (this._firebaseAuth.user) {
+          var users = new Firebase('https://employeeio.firebaseio.com/users');
+
+          users.on('value', function (users) {
+
+            for (var user in users.val()) {
+              if (users.val().hasOwnProperty(user) && users.val()[user].google_id === this._firebaseAuth.user.google.cachedUserProfile.id) {
+                this.userId = user;
+                this.user = users.val()[user];
+              }
+            }
+          }.bind(this));
+        }
+        if (this.user === 'visitor') {
+          return this.fire('visitor-changed', this.user);
+        }
+        return this.fire('user-changed', this.user);
+      }.bind(this));
+    }
+  });
+})();
+</script>
