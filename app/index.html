@@ -57,12 +57,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <body unresolved class="fullbleed layout vertical">
   <span id="browser-sync-binding"></span>
+  <template is="dom-bind" id="io">
+    <iron-pages attr-for-selected="app-route" selected="[[route]]" class="fit">
+      <welcome-section app-route="welcome"></welcome-section>
+    </iron-pages>
+  </template>
   <template is="dom-bind" id="app">
     <iron-pages attr-for-selected="app-route" selected="[[route]]" class="fit">
       <welcome-section app-route="welcome"></welcome-section>
       <create-account-section app-route="create-account"></create-account-section>
       <section app-route="login">Login</section>
-      <section>
+      <section app-route="main">
         <paper-drawer-panel id="paperDrawerPanel">
           <!-- Drawer Scroll Header Panel -->
           <paper-scroll-header-panel drawer fixed>
@@ -73,7 +78,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </paper-toolbar>
 
             <!-- Drawer Content -->
-            <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
+            <paper-menu class="list" attr-for-selected="data-route" selected="{{dataRoute}}" on-iron-select="onMenuSelect">
 
               <a data-route="account" href="/account">
                 <iron-icon icon="account-circle"></iron-icon>
@@ -116,35 +121,46 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
               <!-- Application sub title -->
               <div class="bottom bottom-container center horizontal layout">
-                <div class="bottom-title paper-font-subhead">[[route]]</div>
+                <div class="bottom-title paper-font-subhead">[[dataRoute]]</div>
               </div>
 
             </paper-toolbar>
 
             <!-- Main Content -->
             <div class="content">
-              <iron-pages attr-for-selected="data-route" selected="{{route}}">
+              <iron-pages attr-for-selected="data-route" selected="{{dataRoute}}">
 
                 <section data-route="account">
-
+                  <paper-material elevation="1">
+                    <h1 class="paper-font-display2">user</h1>
+                    <img src="[[user.google_profile_picture]]" height="192" width="192"></img>
+                    <h2 class="paper-font-title">name</h2>
+                    <p>[[user.name]]</p>
+                    <a href="[[user.google_plus_link]]">Google plus Profile</a>
+                    <h1 class="paper-font-display2">company</h1>
+                    <h2 class="paper-font-title">name</h2>
+                    <p>[[user.company.name]]</p>
+                    <h2 class="paper-font-title">location</h2>
+                    <p>[[user.company.location]]</p>
+                  </paper-material>
                 </section>
 
                 <section data-route="employees">
                   <paper-material elevation="1">
                     <h2 class="paper-font-display2">Employee's</h2>
                     <p>This is the employees section</p>
-                    <a href="/employees/Rob">Rob</a>
+                    <iron-list id="employeesList" items="[[employees]]" as="employee" selection-enabled>
+                      <template>
+                        <a href="[[_computeEmployeeLink(employee.user_id)]]">
+                          <span>[[employee.name]]</span>
+                        </a>
+                        <!-- <a href="[[employee.name]]"><span>[[employee.name]]</span></a> -->
+                      </template>
+                    </iron-list>
                   </paper-material>
                 </section>
 
-                <section data-route="employee-info">
-                  <paper-material elevation="1">
-                    <h2 class="paper-font-display2">
-                    Employee:<span>{{params.name}}</span>
-                    </h2>
-                    <div>This is <span>{{params.name}}</span>'s section</div>
-                  </paper-material>
-                </section>
+                <employee-section data-route="employee-info" employee-id="[[employeeId]]" user-id="[[userId]]"></employee-section>
 
                 <section data-route="contact">
                   <paper-material elevation="1">
@@ -180,6 +196,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-drawer-panel>
       </section>
     </iron-pages>
+
+    <login-handler user="{{user}}" user-id="{{userId}}"></login-handler>
+    <load-handler needed-properties='["user", "employees"]' change='["user", "employees", "visitor"]' listen-to="basic"></load-handler>
 
     <!-- Service Worker -->
     <paper-toast id="caching-complete"
