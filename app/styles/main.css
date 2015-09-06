@@ -12,3 +12,25 @@ body {
   font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #333;
 }
+
+.splash {
+  display: flex;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  transition: ease-in 300ms;
+  background: #009688;
+  color: #FFF;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+.hide {
+  /*visibility: hidden;*/
+  transition: opacity ease-out 1000ms;
+  opacity: 0;
+  /*transform: opacity ease-out 1000ms;*/
+}

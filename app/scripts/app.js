@@ -14,6 +14,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // and give it some initial binding values
   // Learn more about auto-binding templates at http://goo.gl/Dx1u2g
   var app = document.querySelector('#app');
+  var splash = document.createElement('span');
+
+  splash.classList.add('splash');
+  splash.setAttribute('id', 'splash');
+  var h = document.createElement('h1');
+  h.innerHTML = 'Loading';
+  splash.appendChild(h);
+  document.querySelector('body').appendChild(splash);
 
   app.displayInstalledToast = function() {
     document.querySelector('#caching-complete').show();
@@ -22,12 +30,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   // Listen for template bound event to know when bindings
   // have resolved and content has been stamped to the page
   app.addEventListener('dom-change', function() {
-    console.log('Our app is ready to rock!');
+
+    var employees = new Firebase('https://employeeio.firebaseio.com/users/-JyIZfklrF9IcfZ87TmS/employees')
+    employees.on('value', function(data) {
+      var _employees = data.val();
+      for (var _employee in _employees) {
+        if (_employees.hasOwnProperty(_employee)) {
+          app.employees = [];
+          _employees[_employee].user_id = _employee;
+          app.push('employees', _employees[_employee]);
+          app.fire('employees-changed')
+        }
+      }
+    });
   });
 
-  // See https://github.com/Polymer/polymer/issues/1381
-  window.addEventListener('WebComponentsReady', function() {
-    // imports are loaded and elements have been registered
+  window.addEventListener('loaded-changed', function (e) {
+    var loaded = e.detail;
+
+    if (loaded.employees && loaded.user) {
+      app.fire('start-routing');
+
+      var splash = document.querySelector('#splash');
+      app.debounce('fadeOut', function () {
+
+        splash.classList.add('hide');
+
+      }, 800);
+
+      app.debounce('removeSplash', function () {
+        document.querySelector('body').removeChild(splash);
+      }, 1200);
+
+    } else if (loaded.visitor) {
+      app.fire('start-routing');
+
+      var splash = document.querySelector('#splash');
+      app.debounce('fadeOut', function () {
+
+        splash.classList.add('hide');
+
+      }, 800);
+
+      app.debounce('removeSplash', function () {
+        document.querySelector('body').removeChild(splash);
+      }, 1200);
+    }
+  });
+
+  addEventListener('user-logged-in', function () {
+    document.location.reload();
+    // console.log();
+    // document.location.href = '#!/main';
+    // document.location.href = document.location.hash
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
@@ -61,6 +116,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     if (drawerPanel.narrow) {
       drawerPanel.closeDrawer();
     }
+  };
+
+  app._computeEmployeeLink = function (id) {
+    return 'employees/' + id;
   };
 
 })(document);
