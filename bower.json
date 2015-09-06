@@ -1,5 +1,6 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "employee-io",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "firebase": "~2.2.9",
