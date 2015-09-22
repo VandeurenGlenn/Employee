@@ -15,7 +15,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="..\..\bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="..\..\bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="..\..\bower_components/paper-toggle-button/paper-toggle-button.html">
-<link rel="import" href="..\..\bower_components/firebase-element/firebase-auth.html">
 <script src="..\..\bower_components/firebase/firebase.js"></script>
 
 <dom-module id="create-account-section">
@@ -112,9 +111,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .gender {
         margin: 16px 0;
       }
+      a[duplicate-email] paper-fab {
+        background: red;
+      }
     </style>
     <!-- TODO: Add route bar -->
-    <firebase-auth location="https://employeeio.firebaseio.com" user="{{_fbUser}}" on-error="errorHandler" status-known="{{statusKnown}}" hidden redirect></firebase-auth>
+    <!-- TODO: check if the user's uid is already in the database -->
     <paper-header-panel>
       <paper-toolbar class="tall">
         <span class="middle title paper-font-display1">Account Wizard</span>
@@ -125,12 +127,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <paper-material elevation="1" id="signUp">
             <h2 class="paper-font-title">Select sign up method</h2>
             <!-- TODO: gold email input ... -->
-            <paper-input label="email" type="email"  auto-validate auto-complete value="[[_user.email]]"></paper-input>
+            <paper-input label="email" type="email"  auto-validate auto-complete value="{{email}}"></paper-input>
             <span class="checkbox"><paper-checkbox on-tap="_setGoogleLogin" title="Login with your Google account"></paper-checkbox>Login with Google</span>
             <span class="flex"></span>
-            <a href="/create-new-account" disabled$="[[_computeValidEmail(_user.email)]]">
+            <a href="/create-new-account" duplicate-email$="[[_duplicate]]" disabled$="[[_computeValidEmail(email, _duplicate)]]">
               <span class="flex"></span>
-              <paper-fab icon="check" title="Continue" disabled$="[[_computeValidEmail(_user.email)]]" on-tap="login"></paper-fab>
+              <paper-fab icon="check" title="Continue" disabled$="[[_computeValidEmail(email, _duplicate)]]" on-tap="login"></paper-fab>
               <span class="flex"></span>
             </a>
           </paper-material>
@@ -142,25 +144,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
             </paper-toolbar> -->
             <h2 class="paper-font-display2 info">Info</h2>
-            <paper-input label="Username" auto-validate auto-complete value="{{_user.name}}"></paper-input>
-            <paper-input label="email" type="email" auto-validate auto-complete value="{{_user.email}}"></paper-input>
-            <paper-input label="firstname" auto-complete value="{{_user.first_name}}"></paper-input>
-            <paper-input label="lastname" auto-complete value="{{_user.family_name}}"></paper-input>
-            <div id="passwordInput" hidden$="[[_user.google_id]]">
+            <paper-input label="Username" auto-validate auto-complete value="{{user.name}}"></paper-input>
+            <paper-input label="email" type="email" auto-validate auto-complete value="{{user.email}}"></paper-input>
+            <paper-input label="firstname" auto-complete value="{{user.firstName}}"></paper-input>
+            <paper-input label="lastname" auto-complete value="{{user.familyName}}"></paper-input>
+            <div id="passwordInput" hidden$="[[user.googleId]]">
               <h2 class="paper-font-display1">Password</h2>
               <paper-input label="Password" type="password"></paper-input>
               <paper-input label="Confirm Password" type="password"></paper-input>
             </div>
             <h2 class="paper-font-display1">Gender</h2>
-            <span class="horizontal gender">Male<span class="flex"></span><paper-toggle-button checked$="[[computeGender(_user.gender)]]"></paper-toggle-button><span class="flex"></span>Female</span>
+            <span class="horizontal gender">Male<span class="flex"></span><paper-toggle-button checked$="[[computeGender(user.gender)]]"></paper-toggle-button><span class="flex"></span>Female</span>
             <h2 class="paper-font-display1">Picture</h2>
             <!-- TODO: add alt="" -->
-            <img src="[[_user.google_profile_picture]]" width="192" height="192"/></img>
+            <img src="[[user.google_profile_picture]]" width="192" height="192"/></img>
             <!-- TODO: add edit function -->
-            <a href="[[_user.google_plus_link]]">Google+ profile</a>
-            <a href="/setup-company" class="horizontal" disabled$="[[_computeDisabled(_user)]]">
+            <a href="[[user.google_plus_link]]">Google+ profile</a>
+            <a href="/setup-company" class="horizontal" disabled$="[[_computeDisabled(user)]]">
               <span class="flex"></span>
-              <paper-fab icon="check" title="proceed to next step" disabled$="[[_computeDisabled(_user)]]"></paper-fab>
+              <paper-fab icon="check" title="proceed to next step" disabled$="[[_computeDisabled(user)]]"></paper-fab>
               <span class="flex"></span>
             </a>
           </paper-material>
@@ -168,12 +170,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <section account-wizard-route="add company info">
           <paper-material id="companyInfo" elevation="1">
             <h2 class="paper-font-display1 info">Info</h2>
-            <paper-input label="company name" auto-complete value="{{_user.company.name}}"></paper-input>
-            <paper-input label="company location" auto-complete value="{{_user.company.location}}"></paper-input>
+            <paper-input label="company name" auto-complete value="{{user.company.name}}"></paper-input>
+            <paper-input label="company location" auto-complete value="{{user.company.location}}"></paper-input>
 
-            <a href="/setup-company" class="horizontal" disabled$="[[_computeSaveDisabled(_user.company.name, _user.company.location)]]">
+            <a href="/setup-company" class="horizontal" disabled$="[[_computeSaveDisabled(user.company.name, user.company.location)]]">
               <span class="flex"></span>
-              <paper-fab icon="check" title="Confirm" on-tap="_saveToFirebase" disabled$="[[_computeSaveDisabled(_user.company.name, _user.company.location)]]"></paper-fab>
+              <paper-fab icon="check" title="Confirm" on-tap="_saveToFirebase" disabled$="[[_computeSaveDisabled(user.company.name, user.company.location)]]"></paper-fab>
               <span class="flex"></span>
             </a>
           </paper-material>
@@ -190,8 +192,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <paper-toast id="paperToast" text="Your draft has been discarded."></paper-toast>
   </template>
   <script>
-  (function() {
-    'use strict';
 
     Polymer({
       is: 'create-account-section',
@@ -206,7 +206,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         email: {
           type: String,
           observer: '_checkForDuplicateEmail',
+          notify: true,
           value: null
+        },
+
+        _duplicate: {
+          type: Boolean,
+          value: false
         },
 
         _fbUser: {
@@ -214,7 +220,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: 'syncUser'
         },
 
-        _user: {
+        params: {
+          type: Object,
+          value: {scope: 'email'}
+        },
+
+        user: {
           type: Object,
           value: function () {
             return {
@@ -236,8 +247,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         validated: {
           type: Array,
-          value: new Array()
+          value: []
         }
+      },
+
+      attached: function () {
+        document.addEventListener('new-user', function (event) {
+          this.syncUser(event.detail);
+        }.bind(this));
       },
 
       errorHandler: function (e) {
@@ -254,22 +271,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _setGoogleLogin: function (e) {
         var inputs = this._getInputs('signUp');
-          for (var i = 0; i < inputs.length; i++) {
-            if (inputs[i].label === 'email') {
-              if (Polymer.dom(e).localTarget.checked) {
-                if (inputs[i].value.length > 1) {
-                  var tempVal = inputs[i].value;
-                  inputs[i].value = tempVal.concat('@gmail.com');
-                } else {
-                  inputs[i].value = '@gmail.com';
-                }
+        var tempVal = null;
+        for (var i = 0; i < inputs.length; i++) {
+          if (inputs[i].label === 'email') {
+            if (Polymer.dom(e).localTarget.checked) {
+              if (inputs[i].value.length > 1) {
+                tempVal = inputs[i].value;
+                inputs[i].value = tempVal.concat('@gmail.com');
               } else {
-                var tempVal = inputs[i].value;
-                inputs[i].value = tempVal.replace('@gmail.com', '');
+                inputs[i].value = '@gmail.com';
               }
-              tempVal = null;
+            } else {
+              tempVal = inputs[i].value;
+              inputs[i].value = tempVal.replace('@gmail.com', '');
             }
           }
+        }
 
       },
 
@@ -278,7 +295,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         for (var i = 0; i < inputs.length; i++) {
           inputs[i].addEventListener('change', this._fireChange.bind(this));
         }
-        // delete inputs;
       },
 
       _getInputs: function (id) {
@@ -290,6 +306,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _fireChange: function (change) {
+
         var target = Polymer.dom(change).localTarget;
         if (target.label === 'email' && target.value.includes('@gmail.com')) {
           // show a tooltip that google login is selected
@@ -299,17 +316,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.email = target.value;
            this.newUser = new Object({login: {provider: "custom"}});
            // this.newUser.login = {provider: "custom"};
-           console.log(this.newUser);
+          //  console.log(this.newUser);
         } else if (target.label === 'company name'){
-          if (!this._user.company) {
-            this._user.company = {};
+          if (!this.user.company) {
+            this.user.company = {};
           }
-          this._user.company.name = target.value;
+          this.user.company.name = target.value;
         } else if (target.label === 'company location'){
-          if (!this._user.company) {
-            this._user.company = {};
+          if (!this.user.company) {
+            this.user.company = {};
           }
-          this._user.company.location = target.value;
+          this.user.company.location = target.value;
         } else if (event.target.validity.typeMismatch) {
           this._showToast(target.label + ': ' + event.target.validationMessage);
         } else {
@@ -327,18 +344,19 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       */
       syncUser: function (user) {
         if (user) {
-          this._user = {
+          this._user = user;
+          this.user = {
             name: user.google.cachedUserProfile.name,
             firstName: user.google.cachedUserProfile.given_name,
             familyName: user.google.cachedUserProfile.family_name,
-            gender: user.google.cachedUserProfile.gender,
+            gender: user.google.cachedUserProfile.gender?user.google.cachedUserProfile.gender:null,
             googleId: user.google.cachedUserProfile.id,
-            googlePlusLink: user.google.cachedUserProfile.link,
+            googlePlusLink: user.google.cachedUserProfile.link?user.google.cachedUserProfile.link:null,
             googleProfilePicture: user.google.cachedUserProfile.picture,
             email: user.google.email
           }
           this.debounce('checkDuplicate', function () {
-            this._checkForDuplicateEmail(this._user.email);
+            this._checkForDuplicateEmail(this.user.email);
             if (!this._duplicate) {
               this.wizardRoute = 'create new account';
             } else {
@@ -349,8 +367,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       login: function () {
-        this.querySelector('firebase-auth').params = {scope: "email"};
-        this.querySelector('firebase-auth').login();
+        // this.querySelector('firebase-auth').params = {scope: "email"};
+        this.fire('login-user');
+        // this.querySelector('firebase-auth').login();
       },
 
       _computeSaveDisabled: function(name, location) {
@@ -372,7 +391,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _checkForDuplicateEmail: function (email) {
-        var users = this._getRef('users');
+        var users = document.querySelector('employee-data').usersRef('users');
 
         users.on('value', function (snap) {
           var fab = this.$.signUp.querySelector('paper-fab');
@@ -393,7 +412,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                   fab.icon = 'check';
                 }
                 fab.classList.add('green');
-                this.querySelector('firebase-auth').provider = 'google';
+                // this.querySelector('firebase-auth').provider = 'google';
                 return this._duplicate = false;
               }
             }
@@ -402,10 +421,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }.bind(this));
 
 
-      },
-
-      _getRef: function (location) {
-        return new Firebase('https://employeeio.firebaseio.com/' + location);
       },
 
       removeEventListeners: function () {
@@ -431,11 +446,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _saveToFirebase: function () {
-        this.users = this._getRef('users');
-
-        this.users.push(this._user);
+        document.querySelector('employee-data').add('user', this.user);
       }
     });
-  })();
   </script>
 </dom-module>
