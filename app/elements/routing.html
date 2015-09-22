@@ -10,107 +10,92 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <script src="../../bower_components/page/page.js"></script>
 <script>
-  // var _loggedIn = localStorage.getItem('firebase:session::employeeio') ? true:false;
-  // page('/', function (data) {//
-  //     app.route = 'splash';
-  //   }
-  // });
   window.addEventListener('start-routing', function() {
-    var _loggedIn = localStorage.getItem('firebase:session::employeeio') ? true:false;
     // We use Page.js for routing. This is a Micro
     // client-side router inspired by the Express router
     // More info: https://visionmedia.github.io/page.js/
-    page('/', function (data) {
-
-      if (_loggedIn) {
-        app.route = 'main';
-        app.dataRoute = 'employees';
-      } else {
-        app.route = 'welcome';
-      }
+    page('/', function () {
+      app.route = 'main';
+      app.dataRoute = 'employees';
     });
 
     page('/sign-up', function () {
-      if (_loggedIn) {
-        app.route = 'main';
+      if (app.user) {
+        page.redirect('/');
       } else {
         app.route = 'create-account';
-        createAccount = document.querySelector('create-account-section');
+        var createAccount = document.querySelector('create-account-section');
         createAccount.wizardRoute = 'sign up method';
         createAccount.initEventListeners('signUp');
       }
     });
 
     page('/create-new-account', function () {
-      if (_loggedIn) {
-        app.route = 'main';
+      if (app.user) {
+        page.redirect('/');
       } else {
         app.route = 'create-account';
-        createAccount = document.querySelector('create-account-section');
+        var createAccount = document.querySelector('create-account-section');
         createAccount.wizardRoute = 'create new account';
         createAccount.initEventListeners('userInfo');
       }
     });
 
     page('/setup-company', function () {
-      if (_loggedIn) {
-        app.route = 'main';
+      if (app.user) {
+        page.redirect('/');
       } else {
         app.route = 'create-account';
-        createAccount = document.querySelector('create-account-section');
+        var createAccount = document.querySelector('create-account-section');
         createAccount.wizardRoute = 'add company info';
         createAccount.initEventListeners('companyInfo');
       }
     });
 
     page('/account-wizard-complete', function () {
-      if (_loggedIn) {
-        app.route = 'main';
+      if (app.user) {
+        page.redirect('/');
       } else {
         app.route = 'create-account';
-        createAccount = document.querySelector('create-account-section');
+        var createAccount = document.querySelector('create-account-section');
         createAccount.wizardRoute = 'finished';
         createAccount.removeEventListeners();
       }
-
     });
 
     page('/main', function () {
-      if (_loggedIn) {
-        app.route = 'main';
-        app.dataRoute = 'employees';
+      if (app.user) {
+        page.redirect('/');
       } else {
-        app.route = 'welcome';
+        page.redirect('/');
       }
     });
 
     page('/account', function () {
-      if (_loggedIn) {
+      if (app.user) {
         app.route = 'main';
         app.dataRoute = 'account';
       } else {
-        app.route = 'welcome';
+        page.redirect('/');
       }
-
     });
 
     page('/employees', function () {
-      if (_loggedIn) {
+      if (app.user) {
         app.route = 'main';
         app.dataRoute = 'employees';
       } else {
-        app.route = 'welcome';
+        page.redirect('/');
       }
     });
 
     page('/employees/:name', function (data) {
-      var name = data.params.name
-      if (_loggedIn) {
+      if (app.user) {
         app.route = 'main';
         app.dataRoute = 'employee-info';
-        app.employeeId = name;
+        app.employeeId = data.params.name;
       } else {
-        app.route = 'welcome';
+        page.redirect('/');
       }
     });
 
