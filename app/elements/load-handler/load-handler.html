@@ -83,6 +83,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       '_setListeners(listeners)'
     ],
 
+    get template() {
+      var temps = document.querySelectorAll('template');
+      for (var temp = 0; temp < temps.length; temp++) {
+        if (temps[temp].getAttribute('id')) {
+          return temps[temp];
+        }
+      }
+    },
+
+    ready: function () {
+
+      this.template.classList.add('unresolved');
+    },
+
     _computeListeners: function (ready, change, domChange, listenTo, listeners) {
       switch (listenTo) {
         case 'all':
@@ -135,12 +149,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         // this.push('loaded', event.type);
       }
       this.fire('loaded-changed', this.loaded);
-
-      console.log(this.loaded);
-      // else if (e.detail) {
-      //
-      // }
-
+      this.template.classList.remove('unresolved');
     },
 
     propertiesChanged: function () {

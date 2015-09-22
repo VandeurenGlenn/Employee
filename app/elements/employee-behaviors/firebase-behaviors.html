@@ -1,0 +1,76 @@
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+
+<script>
+
+  FirebaseBehaviors = {
+
+    properties: {
+      _user: {
+        type: Object
+      },
+      user: {
+        type: Object
+      },
+      userId: {
+        type: String
+      }
+    },
+
+    userRef: function(uid) {
+      return this._newFirebase(this._computeUserLocation(uid));
+    },
+
+    usersRef: function() {
+      return this._newFirebase('users');
+    },
+
+    employeesRef: function (uid, eid) {
+      return this._newFirebase(this._computeEmployeeLocation(uid, eid));
+    },
+
+    prestationRef: function (uid, eid) {
+      return this._newFirebase(this._computePrestationLocation(uid, eid));
+    },
+
+    _computeUserLocation: function (uid) {
+      return 'users/' + uid;
+    },
+
+    _computeEmployeeLocation: function (uid, eid) {
+      return 'users/' + uid + '/employees/' + eid;
+    },
+
+    _computePrestationLocation: function (uid, eid) {
+      return 'users/' + uid + '/employees/' + eid + '/prestations';
+    },
+
+    _newFirebase: function (childLoc) {
+      return new Firebase('https://employeeio.firebaseio.com/' + childLoc);
+    },
+
+    add: function (arg, data, arg2) {
+      switch (arg) {
+        case 'user':
+          this.userRef(this.userId).set(data);
+          break;
+        case 'prestation':
+          this.prestationRef(this.userId, arg2).push(data);
+          break;
+        default:
+
+      }
+    },
+
+    remove: function (arg, uid, eid) {
+      switch (arg) {
+        case 'employee':
+          this.employeesRef(uid, eid).set(null);
+          break;
+        default:
+
+      }
+    }
+
+  }
+
+</script>

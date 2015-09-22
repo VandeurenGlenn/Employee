@@ -1,0 +1,354 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="../app-sections/contact-section.html">
+<link rel="import" href="../employee-fabs/employee-fabs.html">
+
+<dom-module id="employee-view">
+  <template>
+    <style>
+
+      :host {
+        display: block;
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+      }
+      /* General styles */
+      paper-material {
+        border-radius: 2px;
+        height: 100%;
+        padding: 16px 0 16px 0;
+        width: calc(98.66% - 16px);
+        margin: 16px auto;
+        background: white;
+      }
+      #drawerToolbar {
+        @apply(--drawer-toolbar);
+      }
+      paper-drawer-panel::content [drawer] #mainContainer {
+        border-right: var(--drawer-border-color);
+      }
+      paper-menu a {
+        @apply(--paper-menu-link);
+      }
+      paper-menu iron-icon {
+        margin-right: 33px;
+        opacity: 0.54;
+      }
+      .paper-menu > .iron-selected {
+        color: var(--default-primary-color);
+      }
+      .paper-font-title {
+        text-transform: capitalize;
+      }
+      paper-scroll-header-panel {
+        height: 100%;
+      }
+      paper-material {
+        position: inherit;
+        border-radius: 2px;
+        height: 100%;
+        padding: 16px 0 16px 0;
+        width: calc(98.66% - 16px);
+        margin: 16px auto;
+        background: white;
+      }
+      paper-toolbar.tall .app-name {
+        font-size: 40px;
+        font-weight: 300;
+        /* Required for main area's paper-scroll-header-panel custom condensing transformation */
+        -webkit-transform-origin: left center;
+        transform-origin: left center;
+      }
+      #mainToolbar .middle-container  {
+        height: 100%;
+        margin-left: 48px;
+      }
+      #mainToolbar:not(.tall) .middle {
+        font-size: 18px;
+        padding-bottom: 0;
+      }
+      #mainToolbar .bottom {
+        margin-left: 48px;
+        text-transform: capitalize;
+        /* Required for main area's paper-scroll-header-panel custom condensing transformation */
+        -webkit-transform-origin: left center;
+        transform-origin: left center;
+      }
+
+      /* Height of the scroll area */
+      .content {
+        height: 900px;
+      }
+
+      /* Breakpoints */
+
+      /* Small */
+      @media (max-width: 600px) {
+
+        paper-material {
+          --menu-container-display: none;
+          width: calc(97.33% - 32px);
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .paper-font-display1 {
+          font-size: 12px;
+        }
+
+        paper-toolbar.tall .app-name {
+          font-size: 24px;
+          font-weight: 400;
+        }
+
+        #drawer .paper-toolbar {
+          margin-left: 16px;
+        }
+
+        #overlay {
+          min-width: 360px;
+        }
+
+        .bg {
+          background: white;
+        }
+
+        .dropdown-content {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+        }
+        paper-item {
+          @apply(--layout-horizontal);
+          @apply(--layout-center-center);
+        }
+
+      }
+
+      /* Tablet+ */
+      @media (min-width: 601px) {
+
+        paper-material {
+          width: calc(98% - 46px);
+          margin-bottom: 32px;
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+
+        #drawer.paper-drawer-panel > [drawer] {
+          border-right: 1px solid rgba(0, 0, 0, 0.14);
+        }
+
+        .content iron-pages section, employee-section, employees-section, contact-section {
+          padding: 48px 62px;
+        }
+
+      }
+    </style>
+    <iron-pages attr-for-selected="app-route" selected="[[route]]" class="fit">
+      <create-account-section app-route="create-account"></create-account-section>
+      <section app-route="login">Login</section>
+      <section app-route="main">
+        <paper-drawer-panel id="paperDrawerPanel">
+          <!-- Drawer Scroll Header Panel -->
+          <paper-scroll-header-panel drawer fixed>
+
+            <!-- Drawer Toolbar -->
+            <paper-toolbar id="drawerToolbar">
+              <span class="paper-font-title">Menu</span>
+            </paper-toolbar>
+
+            <!-- Drawer Content -->
+            <paper-menu class="list" attr-for-selected="data-route" selected="{{dataRoute}}" on-iron-select="onMenuSelect">
+
+              <a data-route="account" href="/account">
+                <iron-icon icon="account-circle"></iron-icon>
+                <span>Account</span>
+              </a>
+
+              <a data-route="employees" href="/employees">
+                <iron-icon icon="social:people"></iron-icon>
+                <span>Employee's</span>
+              </a>
+
+              <a data-route="contact" href="/contact">
+                <iron-icon icon="mail"></iron-icon>
+                <span>Contact</span>
+              </a>
+
+              <a data-route="license" href="/license">
+                <iron-icon icon="info"></iron-icon>
+                <span>License</span>
+              </a>
+            </paper-menu>
+          </paper-scroll-header-panel>
+
+          <!-- Main Area -->
+          <paper-scroll-header-panel main condenses keep-condensed-header>
+
+            <!-- Main Toolbar -->
+            <paper-toolbar id="mainToolbar" class="tall">
+              <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+              <span class="flex"></span>
+
+              <!-- Toolbar icons -->
+              <paper-icon-button icon="refresh"></paper-icon-button>
+              <paper-icon-button icon="search"></paper-icon-button>
+              <paper-menu-button horizontal-align="right" vertical-offset="48">
+                <paper-icon-button icon="more-vert" class="dropdown-trigger"></paper-icon-button>
+                <paper-menu class="dropdown-content">
+                  <paper-item on-tap="logout">Logout</paper-item>
+                </paper-menu>
+              </paper-menu-button>
+
+              <!-- Application name -->
+              <div class="middle middle-container center horizontal layout">
+                <div class="app-name">Employee</div>
+              </div>
+
+              <!-- Application sub title -->
+              <div class="bottom bottom-container center horizontal layout" style="width: 100%">
+                <div class="bottom-title paper-font-subhead">[[dataRoute]]</div>
+              </div>
+            </paper-toolbar>
+
+            <div class="horizontal">
+              <span class="flex"></span>
+              <employee-fabs show-fab="[[dataRoute]]" fabs='[{"fab": "employees", "title": "add employee", "icon": "add", "el": "employees-section", "eventName": "openAddDialog"}, {"fab": "contact", "title": "send a mail", "icon": "mail", "el": "contact-section", "eventName": "openSendMail"}, {"fab": "employee-info", "title": "add prestation", "icon": "add", "el": "employee-section", "eventName": "openPrestationDialog"}]'></employee-fabs>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content">
+              <iron-pages attr-for-selected="data-route" selected="{{dataRoute}}">
+
+                <section data-route="account">
+                  <paper-material elevation="1">
+                    <img src="[[user.googleProfilePicture]]" height="192" width="192"></img>
+                    <h2 class="paper-font-title">name</h2>
+                    <p>[[user.name]]</p>
+                    <a href="[[user.googlePlusLink]]">Google plus Profile</a>
+                    <h1 class="paper-font-display2">company</h1>
+                    <h2 class="paper-font-title">name</h2>
+                    <p>[[user.company.name]]</p>
+                    <h2 class="paper-font-title">location</h2>
+                    <p>[[user.company.location]]</p>
+                  </paper-material>
+                </section>
+
+                <employees-section data-route="employees" employees="[[employees]]" user-id="[[userId]]" user="[[user]]"></employees-section>
+
+                <employee-section data-route="employee-info" employee-id="[[employeeId]]" user-id="[[userId]]"></employee-section>
+
+                <contact-section data-route="contact">
+                  <paper-material elevation="1">
+                    <h2 class="paper-font-display2">Contact</h2>
+                    <p>This is the contact section</p>
+                  </paper-material>
+                </contact-section>
+
+                <section data-route="license">
+                  <paper-material elevation="1" class="paper-font-body2">
+                    <h1>License</h1>
+                    <p>Everything in this repo is BSD style license unless otherwise specified.</p>
+                    <p>Copyright (c) 2015 The Polymer Authors. All rights reserved.</p>
+                    <p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+                    <ul>
+                    <li>Redistributions of source code must retain the above copyright
+                    notice, this list of conditions and the following disclaimer.</li>
+                    <li>Redistributions in binary form must reproduce the above
+                    copyright notice, this list of conditions and the following disclaimer
+                    in the documentation and/or other materials provided with the
+                    distribution.</li>
+                    <li>Neither the name of Google Inc. nor the names of its
+                    contributors may be used to endorse or promote products derived from
+                    this software without specific prior written permission.</li>
+                    </ul>
+                    <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+                  </paper-material>
+                </section>
+
+              </iron-pages>
+            </div>
+          </paper-scroll-header-panel>
+        </paper-drawer-panel>
+      </section>
+    </iron-pages>
+  </template>
+  <script>
+
+    Polymer({
+      is: 'employee-view',
+
+      properties: {
+        route: {
+          type: String,
+          notify: true
+        },
+
+        employees: {
+          type: Array
+        },
+
+        user: {
+          type: Object
+        },
+
+        userId: String,
+
+        employeeId: String,
+
+        wizardRoute: String,
+
+        fabs: Array
+      },
+
+      _narrowChanged: function (narrow) {
+        if (narrow) {
+          this._employeeFabs.setClass('paper-fab-bottom', 'paper-fab-top');
+        } else {
+          this._employeeFabs.setClass('paper-fab-top', 'paper-fab-bottom');
+        }
+      },
+
+      attached: function () {
+        document.querySelector('paper-drawer-panel').addEventListener('narrow-changed', this._narrowChanged.bind(this));
+        this._employeeFabs.setClass('paper-fab-top', 'paper-fab-bottom');
+        document.querySelector('paper-scroll-header-panel').addEventListener('paper-header-transform', function (e) {
+          var headerState = e.target.headerState;
+          if (headerState === 1) {
+            this._employeeFabs.setClass('paper-fab-bottom', 'paper-fab-top');
+          } else if (headerState !== 3 && headerState !== 1) {
+            this._employeeFabs.setClass('paper-fab-top', 'paper-fab-bottom');
+          }
+        }.bind(this));
+      },
+
+      get _employeeFabs() {
+        return document.querySelector('employee-fabs');
+      },
+
+      logout: function () {
+        document.querySelector('login-handler').logout();
+      },
+
+      // Close drawer after menu item is selected if drawerPanel is narrow
+      onMenuSelect: function() {
+        var drawerPanel = this.querySelector('#paperDrawerPanel');
+        if (drawerPanel.narrow) {
+          drawerPanel.closeDrawer();
+        }
+      }
+    });
+  </script>
+</dom-module>
