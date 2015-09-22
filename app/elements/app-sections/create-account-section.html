@@ -390,7 +390,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _checkForDuplicateEmail: function (email) {
-        var users = document.querySelector('employee-data').usersRef('users');
+        var users = new Firebase('https://employeeio.firebaseio.com/users');
 
         users.on('value', function (snap) {
           var fab = this.$.signUp.querySelector('paper-fab');
