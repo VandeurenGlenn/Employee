@@ -20,6 +20,10 @@
       return this._newFirebase(this._computeUserLocation(uid));
     },
 
+    usersRef: function() {
+      return this._newFirebase('users');
+    },
+
     employeesRef: function (uid, eid) {
       return this._newFirebase(this._computeEmployeeLocation(uid, eid));
     },
