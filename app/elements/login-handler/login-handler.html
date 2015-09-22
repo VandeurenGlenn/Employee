@@ -9,56 +9,112 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/firebase-element/firebase-auth.html">
+<link rel="import" href="../employee-behaviors/firebase-behaviors.html">
+<script src="..\..\bower_components/firebase/firebase.js"></script>
+<dom-module id="login-handler">
+  <template>
+    <firebase-auth location="https://employeeio.firebaseio.com" user="{{_user}}" provider="[[provider]]"></firebase-auth>
+    <employee-login-dialog opened$="[[_computeOpened(_user, creatingAccount)]]" entry-animation="scale-up-animation" exit-animation="fade-out-animation"></employee-login-dialog>
+  </template>
+  <script>
 
-<script>
-(function() {
-  'use strict';
+    Polymer({
+      is: 'login-handler',
+      behaviors: [FirebaseBehaviors],
 
-  Polymer({
-    is: 'login-handler',
+      properties: {
+        _user: {
+          type: Object,
+          observer: '_userChanged'
+        },
 
-    properties: {
-      user: {
-        type: Object,
-        value: 'visitor',
-        notify: true
+        user: {
+          type: Object,
+          value: null,
+          notify: true
+        },
+
+        creatingAccount: {
+          type: Boolean,
+          value: false
+        },
+
+        existingUser: {
+          type: Boolean,
+          observer: 'existingUserChanged'
+        },
+
+        userId: {
+          type: String,
+          notify: true
+        },
+
+        provider: {
+          type: String,
+          value: 'google'
+        },
+
+        params: {
+          type: Object,
+          value: function () {
+            return new Object({scope: "email"})
+          }
+        }
       },
 
-      userId: {
-        type: String,
-        notify: true
+      existingUserChanged: function (exists) {
+        console.log(exists);
+        if (!exists) {
+          page.redirect('/sign-up');
+        }
+      },
+
+      detached: function () {
+        document.removeEventListener('login-user');
+      },
+
+      _computeOpened: function (user, creatingAccount) {
+        if (!user && !creatingAccount) {
+          // this.addEventListener('login-user', this._login.bind(this));
+          return true;
+        }
+        // this.removeEventListener('login-user');
+        return false;
+      },
+
+      _login: function () {
+        this.querySelector('firebase-auth').params = {scope: 'email'};
+        this.querySelector('firebase-auth').login();
+      },
+
+      logout: function () {
+        this.querySelector('firebase-auth').logout();
+      },
+
+      _userChanged: function (_user) {
+        if (_user) {
+          document.removeEventListener('login-user');
+          this.userRef(_user.uid).on('value', function (snap) {
+             this.user = snap.val();
+             if(this.user) {
+               return this.existingUser = true;
+             }
+             this.fire('new-user', this._user);
+             return this.existingUser = false;
+           }.bind(this));
+          this._setUserId(_user.uid);
+        } else {
+          this.user = null;
+          delete this.user;
+          delete this.userId;
+          document.addEventListener('login-user', this._login.bind(this));
+        }
+      },
+
+      _setUserId: function (uid) {
+        return this.userId = uid;
       }
-    },
-
-    attached: function () {
-      this._firebaseAuth = document.createElement('firebase-auth');
-      this._firebaseAuth.location = 'https://employeeio.firebaseio.com';
-      // this._firebaseAuth.login();
-      Polymer.dom(this).appendChild(this._firebaseAuth);
-      // this._firebaseAuth.addEventListener('user-changed', function () {
-      //   console.log('cg');
-      // });
-
-      this._firebaseAuth.addEventListener('status-known-changed', function (e) {
-        if (this._firebaseAuth.user) {
-          var users = new Firebase('https://employeeio.firebaseio.com/users');
-
-          users.on('value', function (users) {
-
-            for (var user in users.val()) {
-              if (users.val().hasOwnProperty(user) && users.val()[user].google_id === this._firebaseAuth.user.google.cachedUserProfile.id) {
-                this.userId = user;
-                this.user = users.val()[user];
-              }
-            }
-          }.bind(this));
-        }
-        if (this.user === 'visitor') {
-          return this.fire('visitor-changed', this.user);
-        }
-        return this.fire('user-changed', this.user);
-      }.bind(this));
-    }
-  });
-})();
-</script>
+    });
+  </script>
+</dom-module>

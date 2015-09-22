@@ -1,0 +1,80 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../employee-icons/employee-icons.html">
+
+<dom-module id="employee-button">
+  <template>
+    <style>
+      :host {
+        display: inline-flex;
+        color: white;
+        /*width: 190px;*/
+        border-radius: 5px;
+        white-space: nowrap;
+      }
+      :host:hover {
+        cursor: pointer;
+      }
+      :host[icon="employee-icons:google-login"] {
+        background: #4285f4;
+      }
+      :host[icon="employee-icons:account-circle"] {
+        background: var(--light-primary-color);
+      }
+      .icon {
+        @apply(--layout-center-center);
+        @apply(--layout-vertical);
+        width: 42px;
+        height: 42px;
+      }
+      :host[icon="employee-icons:google-login"] .icon {
+        border-right: #2265d4 1px solid;
+      }
+      :host[icon="employee-icons:account-circle"] .icon {
+        border-right: var(--accent-color) 1px solid;
+      }
+      .label {
+        @apply(--layout-center-center);
+        @apply(--layout-vertical);
+        width: calc(100% - 64px);
+        font-size: 14px;
+        font-weight: bold;
+        /* Use the Roboto font that is loaded in the <head> */
+        font-family: 'Roboto', sans-serif;
+        text-transform: capitalize;
+      }
+    </style>
+      <template is="dom-if" if="[[icon]]">
+        <span class="icon">
+          <iron-icon icon="[[icon]]"></iron-icon>
+        </span>
+      </template>
+    <span class="label"><content></content></span>
+  </template>
+  <script>
+  (function() {
+    'use strict';
+
+    Polymer({
+      is: 'employee-button',
+
+      properties: {
+        icon: {
+          type: String,
+          value: null
+        }
+      }
+    });
+  })();
+  </script>
+</dom-module>

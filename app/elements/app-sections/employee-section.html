@@ -27,6 +27,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--layout-horizontal);
         @apply(--layout-center);
       }
+      span {
+        @apply(--paper-font-common-base);
+        line-height: 20px;
+        font-size: 20px;
+      }
+      h4 {
+        @apply(--paper-font-title);
+        line-height: 20px;
+        font-size: 20px;
+      }
       paper-item {
         @apply(--paper-font-common-base);
       }
@@ -34,11 +44,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         padding: 16px;
         @apply(--layout-vertical);
       }
-      paper-fab {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-      }
+
       paper-input {
         text-decoration: none;
       }
@@ -48,6 +54,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .paper-font-display2 {
         margin: 16px 0;
       }
+      .tabel {
+        padding: 0 32px 32px;
+      }
       @media (max-width: 601px) {
         paper-button[dialog-dismiss], paper-button[dialog-confirm] {
           display: block;
@@ -56,6 +65,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 100%;
           height: 100%;
         }
+        paper-fab {
+          position: fixed;
+          bottom: 32px;
+          right: 32px;
+        }
       }
 
       @media (min-width: 600px) {
@@ -63,42 +77,57 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           min-width: 500px;
           min-height: 450px;
         }
+        paper-fab {
+          /*position: fixed;*/
+          margin-top: -94px;
+          z-index: 1000;
+        }
       }
 
     </style>
-
     <paper-material elevation="1">
       <div class="horizontal">
-        <h2 class="paper-font-display2">Employee:<span>{{employee.name}}</span></h2>
+        <h2 class="paper-font-head">Employee: <span>{{employee.name}}</span></h2>
         <span class="flex"></span>
-        <paper-menu-button horizontal-align="right">
-          <paper-icon-button icon="settings" class="dropdown-trigger"></paper-icon-button>
-          <paper-menu class="dropdown-content">
-            <paper-item>Share</paper-item>
-            <paper-item>Settings</paper-item>
-            <paper-item>Help</paper-item>
-          </paper-menu>
-        </paper-menu-button>
       </div>
-      <div>This is <span>{{employee.name}}</span>'s section</div>
+      <template is="dom-if" if="[[employee.prestations]]">
+        <div class="horizontal">
+          <h4>Prestations</h4>
+          <span class="flex"></span>
+          <h4>total:</h4><span>[[totalHours]]</span>
+        </div>
+        <div class="tabel">
+          <div class="horizontal">
+            <h4>date</h4>
+            <span class="flex"></span>
+            <h4>hours</h4>
+          </div>
+          <template is="dom-repeat" items="[[_computePrestations(employee.prestations)]]" as="prestation">
+            <div class="horizontal">
+              <span>[[prestation.date]]</span>
+              <span class="flex"></span>
+              <span>[[prestation.total]]</span>
+            </div>
+          </template>
+        </div>
+      </template>
+      <template is="dom-if" if="[[!employee.prestations]]">
+        <p>There aren't any prestations logged</p>
+      </template>
     </paper-material>
-
-    <paper-fab icon="add" on-tap="addPrestation"></paper-fab>
 
     <paper-dialog id="addPrestationDialog">
       <h2 class="paper-font-title">Add Hours</h2>
       <paper-input id="date" label="day" type="date" default-value="[[_computeDate(date)]]" date="[[date]]"  always-float-label></paper-input>
-      <paper-input label="start" type="time" always-float-label></paper-input>
-      <paper-input label="end" type="time" always-float-label></paper-input>
+      <paper-input id="startTime" label="start" type="time" always-float-label></paper-input>
+      <paper-input id="endTime" label="end" type="time" always-float-label></paper-input>
       <paper-button dialog-dismiss>Cancel</paper-button>
-      <paper-button dialog-confirm>Accept</paper-button>
+      <paper-button dialog-confirm on-tap="savePrestation">Accept</paper-button>
     </paper-dialog>
 
     <firebase-document location="[[_computeLocation(userId, employeeId)]]" data="{{employee}}" hidden></firebase-document>
   </template>
   <script>
-  (function() {
-    'use strict';
 
     Polymer({
       is: 'employee-section',
@@ -113,10 +142,48 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: null
         },
 
-        date: String
+        employee: {
+          type: Object,
+          notify: true
+        },
+
+        date: String,
+
+        totalHours: {
+          type: Number,
+          value: 0
+        }
       },
+
+      observers: [
+        'classChanged(class)',
+        '_prestationsChanged(employee.prestations)'
+      ],
+
       attached: function () {
         this._getLocalDate();
+      },
+
+      classChanged: function (c) {
+        if (c.includes('iron-selected')) {
+          this.setListeners('fire-open-prestation-dialog');
+        } else {
+          this.removeListeners();
+        }
+      },
+
+      removeListeners: function () {
+        this.removeEventListener('fire-open-prestation-dialog');
+      },
+
+      setListeners: function (e) {
+        this.addEventListener(e, this._handleEvent.bind(this));
+      },
+
+      _handleEvent: function (event) {
+        if (event.type === 'fire-open-prestation-dialog') {
+          this.openPrestationDialog();
+        }
       },
 
       // listeners: [
@@ -124,14 +191,30 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // ],
 
       _computeLocation: function (userId, employeeId) {
-        return 'https://employeeio.firebaseio.com/users/' + userId + '/employees/' + employeeId;
+        if (userId && employeeId) {
+          console.log('https://employeeio.firebaseio.com/users/' + userId + '/employees/' + employeeId);
+          return 'https://employeeio.firebaseio.com/users/' + userId + '/employees/' + employeeId;
+        }
       },
 
+      _computeEmployeeId: function (uid) {
+        return uid;
+      },
+
+      _computePrestations: function (prestations) {
+        this.items = new Array();
+        for (var prestation in prestations) {
+          if (prestations.hasOwnProperty(prestation)) {
+            this.push('items', prestations[prestation]);
+          }
+        }
+        return this.items;
+      },
       // employeeChanged: function (employee) {
       //   document.location.hash = document.location.hash + '#' + employee.name;
       // },
 
-      addPrestation: function () {
+      openPrestationDialog: function () {
         this.$.addPrestationDialog.open();
       },
 
@@ -142,8 +225,45 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _computeDate: function (date) {
         return date;
+      },
+
+      savePrestation: function (e) {
+        if (this.$.date.value && this.$.startTime.value && this.$.endTime.value) {
+          var data = {
+            date: this.$.date.value,
+            start: this.$.startTime.value,
+            end: this.$.endTime.value,
+            total: this._computeHours(this.$.startTime.value, this.$.endTime.value)
+          }
+          document.querySelector('employee-data').add('prestation', data, this.employeeId);
+        }
+      },
+
+      _computeHours: function (start, end) {
+        if (start && end) {
+          var startTime = start.split(':');
+          var endTime = end.split(':');
+          if (endTime[0] < startTime[0] && endTime[1] > startTime[1]) {
+            return (24 - (startTime[0] - endTime[0])) + '.' + (startTime[1] - endTime[1]);
+          }
+
+          if (endTime[1] < startTime[1]) {
+            return (endTime[0] - startTime[0]) + '.' + (startTime[1] - endTime[1]);
+          }
+
+          return (endTime[0] - startTime[0]) + '.' + (endTime[1] - startTime[1]);
+        }
+      },
+
+      _prestationsChanged: function (prestations) {
+        for (var prestation in prestations) {
+          if (prestations.hasOwnProperty(prestation)) {
+            var total = Number(prestations[prestation].total);
+            var hours = Number(this.totalHours);
+            this.totalHours = hours + total;
+          }
+        }
       }
     });
-  })();
   </script>
 </dom-module>

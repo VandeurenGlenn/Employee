@@ -27,28 +27,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     document.querySelector('#caching-complete').show();
   };
 
-  // Listen for template bound event to know when bindings
-  // have resolved and content has been stamped to the page
-  app.addEventListener('dom-change', function() {
-
-    var employees = new Firebase('https://employeeio.firebaseio.com/users/-JyIZfklrF9IcfZ87TmS/employees')
-    employees.on('value', function(data) {
-      var _employees = data.val();
-      for (var _employee in _employees) {
-        if (_employees.hasOwnProperty(_employee)) {
-          app.employees = [];
-          _employees[_employee].user_id = _employee;
-          app.push('employees', _employees[_employee]);
-          app.fire('employees-changed')
-        }
-      }
-    });
-  });
-
+  // Listen for a loaded-changed event to know when bindings
+  // have resolved, content has been stamped to the page and all data is loaded
   window.addEventListener('loaded-changed', function (e) {
     var loaded = e.detail;
 
-    if (loaded.employees && loaded.user) {
+      console.log(app.user);
+
+    if (loaded.user && loaded.employees?loaded.employees:true) {
       app.fire('start-routing');
 
       var splash = document.querySelector('#splash');
@@ -62,27 +48,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         document.querySelector('body').removeChild(splash);
       }, 1200);
 
-    } else if (loaded.visitor) {
-      app.fire('start-routing');
-
-      var splash = document.querySelector('#splash');
-      app.debounce('fadeOut', function () {
-
-        splash.classList.add('hide');
-
-      }, 800);
-
-      app.debounce('removeSplash', function () {
-        document.querySelector('body').removeChild(splash);
-      }, 1200);
     }
-  });
-
-  addEventListener('user-logged-in', function () {
-    document.location.reload();
-    // console.log();
-    // document.location.href = '#!/main';
-    // document.location.href = document.location.hash
   });
 
   // Main area's paper-scroll-header-panel custom condensing transformation of
@@ -110,16 +76,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     Polymer.Base.transform('scale(' + scaleMiddle + ') translateZ(0)', appName);
   });
 
-  // Close drawer after menu item is selected if drawerPanel is narrow
-  app.onMenuSelect = function() {
-    var drawerPanel = document.querySelector('#paperDrawerPanel');
-    if (drawerPanel.narrow) {
-      drawerPanel.closeDrawer();
-    }
-  };
-
   app._computeEmployeeLink = function (id) {
     return 'employees/' + id;
+  };
+
+  app.AddEmployeeDialog = function () {
+    app.querySelector('#addEmployeeDialog').open();
   };
 
 })(document);

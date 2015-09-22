@@ -1,0 +1,104 @@
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/paper-input/paper-input.html">
+<link rel="import" href="..\..\bower_components/paper-input/paper-textarea.html">
+
+<dom-module id="contact-section">
+  <style is="custom-style">
+    :root {
+      --paper-input-container-underline: {
+        height: 0;
+      };
+    }
+   :host {
+     display: block;
+   }
+   .vertical {
+     @apply(--layout-vertical);
+   }
+   .horizontal {
+     @apply(--layout-horizontal);
+   }
+   employee-dialog {
+     position: fixed;
+   }
+   paper-input-container {
+     padding: 0;
+     line-height: 20px;
+     outline: none;
+     word-wrap: break-word;
+     border: none;
+   }
+   paper-input-container:not(.subject) {
+     padding-top: 20px;
+     min-height: 119px;
+     --paper-input-container-underline-focus: {
+       height: 0;
+     };
+   }
+   paper-button {
+     color: var(--text-primary-color);
+     background: var(--accent-color);
+   }
+  </style>
+  <template>
+    <content></content>
+    <employee-dialog with-backdrop>
+      <div class="horizontal">
+        <span class="flex"></span>
+        <paper-icon-button icon="close" title="close" on-tap="closeDialog"></paper-icon-button>
+      </div>
+      <div class="vertical">
+        <paper-input-container class="subject" no-label-float>
+          <label hidden$="[[!subject]]">subject</label>
+          <input type="text" is="iron-input" value="{{subject}}">
+        </paper-input-container>
+        <paper-input-container no-label-float>
+          <label>say something</label>
+          <input type="text" is="iron-input">
+        </paper-input-container>
+      </div>
+      <div buttons>
+        <paper-button dialog-confirm raised>send</paper-button>
+      </div>
+    </employee-dialog>
+  </template>
+  <script>
+   Polymer({
+     is: 'contact-section',
+
+     observers: [
+       'classChanged(class)'
+     ],
+
+     classChanged: function (c) {
+       if (c.includes('iron-selected')) {
+         this.setListeners('fire-open-send-mail');
+       } else {
+         this.removeListeners();
+       }
+     },
+
+     removeListeners: function () {
+       this.removeEventListener('fire-open-send-mail');
+     },
+
+     setListeners: function (e) {
+       this.addEventListener(e, this._handleEvent.bind(this));
+     },
+
+     _handleEvent: function (event) {
+       if (event.type === 'fire-open-send-mail') {
+         this._openMailDialog();
+       }
+     },
+
+     _openMailDialog: function () {
+       this.querySelector('employee-dialog').open();
+     },
+
+     closeDialog: function () {
+       document.querySelector('employee-dialog').close();
+     }
+   });
+  </script>
+</dom-module>

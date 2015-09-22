@@ -1,0 +1,248 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+<link rel="import" href="..\..\bower_components/paper-material/paper-material.html">
+<link rel="import" href="..\..\bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../employee-behaviors/firebase-behaviors.html">
+
+<dom-module id="employees-section">
+  <template>
+    <style>
+      :host {
+        display: flex;
+        flex-direction: column;
+      }
+      a {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        text-decoration: none;
+        color: inherit;
+        width: 100%;
+      }
+      iron-list {
+        overflow: inherit;
+      }
+      .horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+      paper-dialog {
+        @apply(--layout-flex);
+        min-height: 150px;
+        min-width: 250px;
+      }
+      .scroll-area {
+        display: block;
+        min-height: 32px;
+      }
+      paper-input {
+        @apply(--paper-font-common-base);
+        text-transform: capitalize;
+      }
+      paper-button[disabled] {
+        background: transparent;
+      }
+      h4 {
+        @apply(--paper-font-title);
+        text-transform: capitalize;
+      }
+      h2 {
+        @apply(--paper-font-display2);
+        text-transform: capitalize;
+      }
+      paper-material, .list-item {
+        border-radius: 2px;
+        min-height: 30px;
+        height: 100%;
+        padding: 16px 0 16px 0;
+        width: calc(98.66% - 16px);
+        margin: 16px auto;
+        background: white;
+        position: inherit;
+      }
+      @media (max-width: 600px) {
+
+        paper-material, .list-item {
+          --menu-container-display: none;
+          width: calc(97.33% - 32px);
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+      }
+      /* Tablet+ */
+      @media (min-width: 601px) {
+
+        paper-material {
+          margin-bottom: 32px;
+        }
+        .list-item {
+          margin-bottom: 16px;
+        }
+
+        paper-material, .list-item {
+          width: calc(98% - 46px);
+          padding-left: 30px;
+          padding-right: 30px;
+        }
+
+      }
+
+    </style>
+    <template is="dom-repeat" items="[[employees]]" as="employee">
+      <a href="[[_computeEmployeeLink(employee.__firebaseKey__)]]" on-tap="_tapHandler">
+        <paper-material elevation="1" class="horizontal list-item"  uid="[[employee.__firebaseKey__]]">
+
+              <span uid="[[employee.__firebaseKey__]]">[[employee.name]]</span>
+
+            <span class="flex"></span>
+          <paper-menu-button horizontal-align="right">
+            <paper-icon-button icon="more-vert" class="dropdown-trigger" alt="menu"></paper-icon-button>
+            <paper-menu class="dropdown-content">
+              <paper-item>Settings</paper-item>
+              <paper-item uid="[[_computeEmployeeUid(employee.__firebaseKey__)]]" on-tap="removeEmployee">Remove</paper-item>
+            </paper-menu>
+          </paper-menu-button>
+        </paper-material>
+      </a>
+    </template>
+
+    <paper-dialog with-backdrop modal>
+      <h4>add employee</h4>
+
+        <paper-dialog-scrollable>
+          <div class="scroll-area">
+            <paper-input label="name" always-float-label></paper-input>
+            <paper-input label="function" always-float-label></paper-input>
+            <h4>address</h4>
+            <paper-input label="address" always-float-label></paper-input>
+          </div>
+        </paper-dialog-scrollable>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button id="AddEmployeeBtn" dialog-confirm on-tap="_AddEmployee">Accept</paper-button>
+      </div>
+    </paper-dialog>
+
+  </template>
+  <script>
+
+    Polymer({
+      is: 'employees-section',
+      behaviors: [FirebaseBehaviors],
+
+      properties: {
+
+        userId: String,
+
+        user: Object,
+
+        employees: {
+          type: Array,
+          notify: true,
+          value: []
+        },
+
+        _employee: {
+          type: Object,
+          value: {
+            name: null,
+            function: null,
+            address: null
+          }
+        }
+      },
+
+      observers: [
+        'classChanged(class)'
+      ],
+
+      classChanged: function (c) {
+        if (c.includes('iron-selected')) {
+          this.setListeners('fire-open-add-dialog');
+        } else {
+          this.removeListeners();
+        }
+
+      },
+      attached: function () {
+        this._calculateAddEmployeeDisabled(this._employee);
+      },
+
+      get inputs() {
+        return Polymer.dom(this.querySelectorAll('paper-input')).node;
+      },
+
+      _computeEmployeeLink: function (id) {
+        return 'employees/' + id;
+      },
+
+      openAddDialog: function () {
+        var dialog = this.querySelector('paper-dialog');
+        this._attachInputListeners(this._employee);
+        dialog.open();
+      },
+
+      _attachInputListeners: function (target) {
+        for (var i = 0; i < this.inputs.length; i++) {
+          this.inputs[i].addEventListener('value-changed', function (e) {
+            var input = Polymer.dom(e).localTarget;
+            if (target[input.label] !== input.value) {
+              target[input.label] = input.value;
+              this._calculateAddEmployeeDisabled(target);
+            }
+          }.bind(this));
+        }
+      },
+
+      _calculateAddEmployeeDisabled: function (e) {
+        if (e.name && e.function) {
+          return Polymer.dom(this.querySelector('#AddEmployeeBtn')).removeAttribute('disabled');
+        }
+        return Polymer.dom(this.querySelector('#AddEmployeeBtn')).setAttribute('disabled', '');
+      },
+
+      _AddEmployee: function () {
+        var ref = new Firebase('https://employeeio.firebaseio.com/users/' + this.userId + '/employees');
+        ref.push(this._employee);
+      },
+
+      _computeEmployeeUid: function (uid) {
+        return uid;
+      },
+
+      removeEmployee: function (e) {
+        this.remove('employee', this.userId, e.target.uid);
+      },
+
+      _tapHandler: function (e) {
+        if (e.target.localName === 'iron-icon') {
+          e.preventDefault();
+        } else if (e.target.localName === 'paper-item') {
+          e.preventDefault();
+          this.querySelector('paper-menu-button').close();
+        }
+      },
+
+      setListeners: function (listener) {
+        this.addEventListener(listener, this.openAddDialog.bind(this))
+      },
+
+      removeListeners: function () {
+        this.debounce('debounceRemove', function () {
+          this.removeEventListener('fire-open-add-dialog');
+        }.bind(this));
+      }
+
+    });
+  </script>
+</dom-module>

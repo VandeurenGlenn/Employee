@@ -1,0 +1,70 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="..\..\bower_components/polymer/polymer.html">
+
+<dom-module id="employee-route-handler">
+  <script>
+
+    Polymer({
+      is: 'employee-route-handler',
+
+      properties: {
+        route: {
+          type: String,
+          value: 'account',
+          observer: '_routeChanged'
+        },
+
+        dataRoute: {
+          type: String,
+          observer: '_routeChanged'
+        },
+
+        creatingAccount: {
+          type: Boolean,
+          value: false,
+          notify: true
+        }
+      },
+
+      get app() {
+        return Polymer.dom(document.querySelector('#app'));
+      },
+
+      _routeChanged: function (route) {
+        document.removeEventListener('fab-tapped');
+        switch (route) {
+          case 'create-account':
+            this.creatingAccount = true;
+            break;
+          case 'employees':
+          case 'contact':
+            this._addEventListener('fab-tapped');
+            break;
+          default:
+            this.creatingAccount = false;
+        }
+
+      },
+
+      _addEventListener: function (e) {
+        document.addEventListener(e, this._handleEvent.bind(this));
+      },
+
+      _handleEvent: function (event) {
+        var el = document.querySelector(event.detail.el);
+        var e = 'fire-' + event.detail.eventName.replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
+        el.setListeners(e);
+        el.fire(e, event.detail.el);
+      }
+    });
+  </script>
+</dom-module>
